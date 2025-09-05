@@ -1,8 +1,16 @@
-import TelegramBot from "node-telegram-bot-api";
 import { MongoClient } from "mongodb";
+import TelegramBot from "node-telegram-bot-api";
 
-const token = process.env.BOT_TOKEN;      // BotFather API token
-const mongoUrl = process.env.MONGO_URL;   // Railway MongoDB connection
+// Railway Variables
+const user = process.env.MONGOUSER;
+const pass = process.env.MONGOPASSWORD;
+const host = process.env.MONGOHOST;
+const port = process.env.MONGOPORT;
+
+const token = process.env.BOT_TOKEN; // Telegram BotFather token
+
+// MongoDB Connection URL ကို Build လုပ်တယ်
+const mongoUrl = `mongodb://${user}:${pass}@${host}:${port}/?authSource=admin`;
 
 const bot = new TelegramBot(token, { polling: true });
 const client = new MongoClient(mongoUrl);
@@ -12,17 +20,16 @@ async function connectDB() {
     await client.connect();
     console.log("✅ MongoDB Connected!");
   } catch (err) {
-    console.error("MongoDB connection failed:", err);
+    console.error("❌ MongoDB connection failed:", err);
   }
 }
 connectDB();
 
 bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
-  const db = client.db("telegrambot");
+  const db = client.db("telegrambot");  // database name
   const users = db.collection("messages");
 
-  // Save message into MongoDB
   await users.insertOne({
     userId: msg.from.id,
     username: msg.from.username,
@@ -32,3 +39,4 @@ bot.on("message", async (msg) => {
 
   bot.sendMessage(chatId, "✅ Your message is saved to MongoDB!");
 });
+
