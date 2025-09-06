@@ -24,7 +24,7 @@ async function connectDB() {
   }
 }
 connectDB();
-
+bot.on("polling_error", (err) => console.error("Polling error:", err));
 bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
   const db = client.db("telegrambot");  // database name
@@ -39,4 +39,5 @@ bot.on("message", async (msg) => {
 
   bot.sendMessage(chatId, "✅ Your message is saved to MongoDB!");
 });
+
 
